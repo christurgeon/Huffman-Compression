@@ -1,6 +1,6 @@
 # Huffman Compression Implementation
 
-This repository was created for learning purposes. It includes the ability to specify files to be compressed on the command line and it then writes out the compressed files to the current working directory.
+This repository was created for learning purposes. It allows the user to speicfy which files to be compressed by providing command line arguments. It also allows the user to decode the encoded file.
 
 # Usage
 
