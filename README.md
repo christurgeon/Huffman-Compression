@@ -4,6 +4,5 @@ This repository was created for learning purposes. It includes the ability to sp
 
 # Usage
 
-* To Compile: ``````
-* To Run: ```./a.out compress file1 file2 file3 ...```
-Note that ```...``` indicates that any number of files can be provided as command line arguments.
+* Compile the program with ```-Wall -o a.out```
+* Run the program with ```./a.out compress file1 file2 file3 ...``` and note that ```...``` indicates that any number of files can be provided as command line arguments.
