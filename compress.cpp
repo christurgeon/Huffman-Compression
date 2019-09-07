@@ -13,8 +13,18 @@ struct Node
 };
 
 
+// Custom comparator for the priority queue
+struct comparator 
+{
+    bool operator()(const Node* lhs, const Node* rhs)
+    {
+        return lhs->freq > rhs->freq;
+    }
+};
+
+
 // Returns a pointer to a new Node
-Node* createNode(char ch, int freq, Node *left, Node *right)
+Node* createNode(char ch, int freq, Node* left, Node* right)
 {
     Node *node = new Node();
     node->ch = ch;
@@ -31,14 +41,15 @@ void buildTree(std::ifstream &infile, std::ofstream &outfile)
     if (!infile.is_open() || !outfile.is_open()) 
         return;
 
-    std::priority_queue<Node> pqueue;
+    std::priority_queue<Node*, std::vector<Node*>, comparator> pqueue;
     std::map<char, Node*> nodes;
     std::map<char, Node*>::iterator it;
 
+    // Get the frequency of each character in the text file
     char ch;
     while (infile >> ch) 
     {
-        if ((it = nodes.find(ch)) != nodes.end())  
+        if ((it = nodes.find(ch)) == nodes.end())  
         {
             nodes[ch] = createNode(ch, 1, NULL, NULL);
         }
@@ -47,17 +58,25 @@ void buildTree(std::ifstream &infile, std::ofstream &outfile)
             nodes[ch]->freq++;
         }
     }
-
-    // TEST HERE
+    
+    // Add the nodes to the priority queue, ordered by lowest frequency
     for (it = nodes.begin(); it != nodes.end(); it++)
     {
         std::cout << "char: " << it->first << "  ===>  " << it->second->freq << std::endl; 
+        pqueue.push(it->second);
+    }
+
+    // Create the Huffman tree
+    while (!pqueue.empty()) 
+    {
+        Node* node_one = pqueue.pop();
+        Node* node_two = pqueue.pop();
     }
 }
 
 
 // Read in files from command line and build Huffman Tree
-int main(int argc, char **argv) 
+int main(int argc, char** argv) 
 {
     int files_compressed = 0;
     for (int i = 1; i < argc; i++) 
