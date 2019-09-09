@@ -35,11 +35,42 @@ Node* createNode(char ch, int freq, Node* left, Node* right)
 }
 
 
+// Encodes the string text using Huffman code
+void encodeString(Node* root, std::string str, std::map<char, std::string> &char_code)
+{
+	if (root == NULL) {
+		return;
+    }
+	if (!root->left && !root->right) {
+		char_code[root->ch] = str;
+    }
+	encodeString(root->left, str + "0", char_code);
+	encodeString(root->right, str + "1", char_code);
+}
+
+
+// Decode a file back to its original state
+void decodeString(Node* root, int &idx, std::string str)
+{
+    if (root == NULL) 
+        return;
+    if (!root->left && !root->right) 
+        return;
+
+    idx++;
+    if (str[idx] == '1') 
+        decodeString(root->right, idx, str);
+    else 
+        decodeString(root->left, idx, str);
+}
+
+
 // Compresses down the file provided and writes it to memory
 void buildTree(std::ifstream &infile, std::ofstream &outfile)
 {
-    if (!infile.is_open() || !outfile.is_open()) 
+    if (!infile.is_open() || !outfile.is_open()) {
         return;
+    }
 
     std::priority_queue<Node*, std::vector<Node*>, comparator> pqueue;
     std::map<char, Node*> nodes;
@@ -47,31 +78,46 @@ void buildTree(std::ifstream &infile, std::ofstream &outfile)
 
     // Get the frequency of each character in the text file
     char ch;
+    std::string file_text = "";
     while (infile >> ch) 
     {
-        if ((it = nodes.find(ch)) == nodes.end())  
-        {
+        if ((it = nodes.find(ch)) == nodes.end()) {
             nodes[ch] = createNode(ch, 1, NULL, NULL);
         }
-        else 
-        {
+        else {
             nodes[ch]->freq++;
         }
+        file_text += ch;
     }
     
     // Add the nodes to the priority queue, ordered by lowest frequency
-    for (it = nodes.begin(); it != nodes.end(); it++)
-    {
-        std::cout << "char: " << it->first << "  ===>  " << it->second->freq << std::endl; 
+    for (it = nodes.begin(); it != nodes.end(); it++) {
         pqueue.push(it->second);
     }
 
     // Create the Huffman tree
-    while (!pqueue.empty()) 
+    while (pqueue.size() != 1) 
     {
-        Node* node_one = pqueue.pop();
-        Node* node_two = pqueue.pop();
+        // Create a new node with left and right node as children; freq as sum
+        Node* l_node = pqueue.top(); pqueue.pop();
+        Node* r_node = pqueue.top(); pqueue.pop();
+        int sum = l_node->freq + r_node->freq;
+        pqueue.push(createNode('\0', sum, l_node, r_node));
     }
+
+    // Get encoding for each character
+    Node* root = pqueue.top();
+    std::map<char, std::string> char_code;
+    encodeString(root, "", char_code);
+
+    // Build the encoding of the entire file
+    std::string encoding = "";
+    for (char ch : file_text) {
+        encoding += char_code[ch];
+    }
+
+    // Dump the encoded file
+    outfile.write(encoding.c_str(), encoding.size());    
 }
 
 
